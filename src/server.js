@@ -1,12 +1,13 @@
 const Hapi = require('@hapi/hapi');
 const CatboxRedis = require('@hapi/catbox-redis');
+const Hoek = require('hoek');
 
 const server = Hapi.server({
     port: 3000,
     host: '0.0.0.0',
     cache: [
         {
-            // name: 'my_cache',
+            name: 'my_cache',
             provider: {
                 constructor: CatboxRedis,
                 options: {
@@ -21,22 +22,40 @@ const server = Hapi.server({
     ],
 });
 
-const init = async () => {
+const start = async () => {
+    const add = async (a, b) => {
+        await Hoek.wait(1500);   // Simulate some slow I/O
+        return Number(a) + Number(b);
+    };
+
+    const sumCache = server.cache({
+        cache: 'my_cache',
+        expiresIn: 10 * 1000,
+        segment: 'customSegment',
+        generateFunc: async (id) => {
+            console.log('id: ', id);
+            return add(id.a, id.b);
+        },
+        generateTimeout: 2000
+    });
+
     server.route({
+        path: '/add/{a}/{b}',
         method: 'GET',
-        path: '/',
-        handler: (request, h) => {
-            return 'Hello World!';
+        handler: async function (request, h) {
+
+            const { a, b } = request.params;
+
+            const id = `ham`;
+
+            return await sumCache.get({ id, a, b });
         }
     });
 
     await server.start();
-    console.log(`Server running on ${server.info.uri}`);
+
+    console.log('Server running at:', server.info.uri);
 };
 
-process.on('unhandledRejection', (err) => {
-    console.log(err);
-    process.exit(1);
-});
+start();
 
-init();

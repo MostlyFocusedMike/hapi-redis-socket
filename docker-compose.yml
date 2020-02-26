@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  # run docker-compose down if you change any of the PG environment variables
+  hapi-redis:
+    build: ./ # location of Dockerfile
+    command: nodemon /usr/app/src/server.js
+    ports:
+      - "3000:3000"
+
+    # these are the links from your local machine:docker files
+    # so that you can access them without restarting docker
+    volumes:
+      - ./src/:/usr/app/src/
+      - ./package.json:/usr/app/package.json
+
+    environment:
+      REDIS: redis
+      REDIS_PORT: 6379
+      NODE_ENV: development
+      PORT: 3000
+    container_name: hapi_redis_container
+
+  redis:
+    image: "redis:alpine"

@@ -1,0 +1,26 @@
+{
+  "name": "hapi-redis-socket",
+  "version": "1.0.0",
+  "description": "just practicing with hapi, redis, and socket.io",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "docker-compose up -d",
+    "in:r": "docker-compose exec redis redis-cli"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MostlyFocusedMike/hapi-redis-socket.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MostlyFocusedMike/hapi-redis-socket/issues"
+  },
+  "homepage": "https://github.com/MostlyFocusedMike/hapi-redis-socket#readme",
+  "dependencies": {
+    "@hapi/catbox-redis": "^5.0.5",
+    "@hapi/hapi": "^18.1.1",
+    "nodemon": "^2.0.2"
+  }
+}

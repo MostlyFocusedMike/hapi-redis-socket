@@ -7,7 +7,7 @@ const server = Hapi.server({
     host: '0.0.0.0',
     cache: [
         {
-            name: 'my_cache',
+            name: 'outline_cache',
             provider: {
                 constructor: CatboxRedis,
                 options: {
@@ -23,32 +23,43 @@ const server = Hapi.server({
 });
 
 const start = async () => {
-    const add = async (a, b) => {
-        await Hoek.wait(1500);   // Simulate some slow I/O
-        return Number(a) + Number(b);
-    };
-
-    const sumCache = server.cache({
-        cache: 'my_cache',
+    const outlineCache = server.cache({
+        cache: 'outline_cache',
         expiresIn: 10 * 1000,
-        segment: 'customSegment',
-        generateFunc: async (id) => {
-            console.log('id: ', id);
-            return add(id.a, id.b);
-        },
-        generateTimeout: 2000
+        segment: 'outlineSegment',
+        // generateFunc: async (outline) => {
+        //     return {
+        //         outlineId: outline.id,
+        //         status: 'publishing'
+        //     };
+        // },
+        // generateTimeout: 4000
     });
 
     server.route({
-        path: '/add/{a}/{b}',
+        path: '/show/{id}',
         method: 'GET',
         handler: async function (request, h) {
 
-            const { a, b } = request.params;
+            const { id } = request.params;
+            const outlineStatus = await outlineCache.get({ id })
+            return outlineStatus || 'na';
+        }
+    });
 
-            const id = `ham`;
+    server.route({
+        path: '/set/{id}',
+        method: 'GET',
+        handler: async function (request, h) {
 
-            return await sumCache.get({ id, a, b });
+            const { id } = request.params;
+
+            await outlineCache.set(id, {
+                outlineId: id,
+                status: 'done'
+            }, 5 * 1000);
+
+            return "OK";
         }
     });
 
@@ -58,4 +69,38 @@ const start = async () => {
 };
 
 start();
+
+
+
+// const start = async () => {
+//     const add = async (a, b) => {
+//         await Hoek.wait(3000);   // Simulate some slow I/O
+//         return Number(a) + Number(b);
+//     };
+
+//     server.method('sum', add, {
+//         cache: {
+//             cache: 'my_cache',
+//             expiresIn: 10 * 1000,
+//             generateTimeout: 4000
+//         }
+//     });
+
+//     server.route({
+//         path: '/add/{a}/{b}',
+//         method: 'GET',
+//         handler: async function (request, h) {
+
+//             const { a, b } = request.params;
+//             return await server.methods.sum(a, b);
+//         }
+//     });
+
+//     await server.start();
+
+//     console.log('Server running at:', server.info.uri);
+
+// };
+
+// start();
 

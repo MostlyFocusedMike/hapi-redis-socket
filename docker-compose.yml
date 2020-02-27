@@ -12,6 +12,7 @@ services:
     # so that you can access them without restarting docker
     volumes:
       - ./src/:/usr/app/src/
+      - ./public/:/usr/app/public/
       - ./package.json:/usr/app/package.json
 
     environment:

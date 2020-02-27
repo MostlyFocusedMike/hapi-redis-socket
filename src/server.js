@@ -1,6 +1,7 @@
 const Hapi = require('@hapi/hapi');
 const CatboxRedis = require('@hapi/catbox-redis');
-const Hoek = require('hoek');
+const Path = require('path');
+// const Hoek = require('hoek');
 
 const server = Hapi.server({
     port: 3000,
@@ -20,9 +21,17 @@ const server = Hapi.server({
             }
         },
     ],
+    routes: {
+        files: {
+            relativeTo: Path.join(__dirname, '..', 'public')
+        }
+    }
 });
 
 const start = async () => {
+
+    await server.register(require('inert'));
+
     const outlineCache = server.cache({
         cache: 'outline_cache',
         expiresIn: 10 * 1000,
@@ -34,6 +43,14 @@ const start = async () => {
         //     };
         // },
         // generateTimeout: 4000
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/',
+        handler: function (request, h) {
+            return h.file('index.html');
+        }
     });
 
     server.route({

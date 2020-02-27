@@ -9,6 +9,7 @@ WORKDIR /usr/app
 
 # this copies everything you need into from local into your docker container to start
 COPY ./src /usr/app/src/
+COPY ./public /usr/app/public/
 COPY ./package*.json /usr/app/
 
 # set up your docker environment with nodemon
